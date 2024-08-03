@@ -19,10 +19,11 @@ simfetch
   .cookie('key', 'value') // cookie key, value
   .query({ cate: 'book' })
   .query({ page: 5 })
+  .call();
   .then((res) => {})
   .catch((err) => {
     console.error(err);
-  });
+  })
 ```
 
 ```ts
@@ -31,8 +32,9 @@ simfetch
   .set('Content-Type', 'application/json')
   .post('/board')
   .body({ title: '', content: '' })
+  .call();
   .then((res) => {})
   .catch((err) => {
     console.error(err);
-  });
+  })
 ```
