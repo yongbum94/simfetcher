@@ -1,5 +1,5 @@
 {
-  "name": "fetch-wrapper",
+  "name": "simfetch",
   "version": "1.0.0",
   "description": "simplify use fetch api",
   "exports": {
@@ -32,7 +32,7 @@
     "fetch",
     "javascript"
   ],
-  "author": "YongBum (https://github.com/yongbum94)",
+  "author": "yongbum (https://github.com/yongbum94)",
   "license": "MIT",
   "repository": {
     "type": "git",

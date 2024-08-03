@@ -19,11 +19,11 @@ simfetch
   .cookie('key', 'value') // cookie key, value
   .query({ cate: 'book' })
   .query({ page: 5 })
-  .call();
+  .call()
   .then((res) => {})
   .catch((err) => {
     console.error(err);
-  })
+  });
 ```
 
 ```ts
@@ -32,9 +32,28 @@ simfetch
   .set('Content-Type', 'application/json')
   .post('/board')
   .body({ title: '', content: '' })
-  .call();
+  .call()
   .then((res) => {})
   .catch((err) => {
     console.error(err);
+  });
+```
+
+```ts
+// prettier-ignore
+const myfetch = () => 
+  simfetch
+    .create({ base: '/v1/api' })
+    .accept('*')
+    .set('Content-Type', 'application/json')
+    .auth(localstorage.get('accessToken'));
+
+// usage simply
+// prettier-ignore
+myfetch()
+  .get('/boards')
+  .call<Response<Boards>>()
+  .then((res) => {
+    console.log(res.jsonbody); // json body parse
   })
 ```
