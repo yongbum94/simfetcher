@@ -7,7 +7,7 @@ export interface WrapperResponse<T extends any> extends Response {
 export class Request extends BaseRequest {
   private _method = '';
 
-  async _fetch<T extends any>() {
+  private async _fetch<T extends any>() {
     let url = this._base + this._url;
 
     if (this._searchParams.size > 0) {

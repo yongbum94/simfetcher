@@ -1,5 +1,7 @@
 import { Request, type WrapperResponse } from './Request.js';
 
+export type { Request, WrapperResponse };
+
 /**
  * 요청을 위한 베이스 생성
  * @returns {Request}
