@@ -5,49 +5,15 @@ export interface WrapperResponse<T extends any> extends Response {
 }
 
 export class Request extends BaseRequest {
-  private _url = '';
   private _method = '';
 
-  get(url: string, query?: Record<string, string>) {
-    this._url = url;
-    this._method = 'GET';
-    if (query) this.query(query);
-    return this;
-  }
-
-  post(url: string, body?: XMLHttpRequestBodyInit) {
-    this._url = url;
-    this._method = 'POST';
-    if (body) this._body = body;
-    return this;
-  }
-
-  put(url: string, body?: XMLHttpRequestBodyInit) {
-    this._url = url;
-    this._method = 'PUT';
-    if (body) this._body = body;
-    return this;
-  }
-
-  patch(url: string, body?: XMLHttpRequestBodyInit) {
-    this._url = url;
-    this._method = 'PATCH';
-    if (body) this._body = body;
-    return this;
-  }
-
-  delete(url: string, body?: XMLHttpRequestBodyInit) {
-    this._url = url;
-    this._method = 'DELETE';
-    if (body) this._body = body;
-    return this;
-  }
-
-  async call<T>() {
+  async _fetch<T extends any>() {
     let url = this._base + this._url;
+
     if (this._searchParams.size > 0) {
       url += '&' + this._searchParams.toString();
     }
+
     const res = (await fetch(url, {
       method: this._method,
       headers: this._header,
@@ -65,5 +31,40 @@ export class Request extends BaseRequest {
     }
 
     return res;
+  }
+
+  get<T>(url?: string, query?: Record<string, string>) {
+    this._method = 'GET';
+    if (url) this._url = url;
+    if (query) this.query(query);
+    return this._fetch<T>();
+  }
+
+  post<T>(url?: string, body?: XMLHttpRequestBodyInit) {
+    this._method = 'POST';
+    if (url) this._url = url;
+    if (body) this._body = body;
+    return this._fetch<T>();
+  }
+
+  put<T>(url?: string, body?: XMLHttpRequestBodyInit) {
+    this._method = 'PUT';
+    if (url) this._url = url;
+    if (body) this._body = body;
+    return this._fetch<T>();
+  }
+
+  patch<T>(url?: string, body?: XMLHttpRequestBodyInit) {
+    this._method = 'PATCH';
+    if (url) this._url = url;
+    if (body) this._body = body;
+    return this._fetch<T>();
+  }
+
+  delete<T>(url?: string, body?: XMLHttpRequestBodyInit) {
+    this._method = 'DELETE';
+    if (url) this._url = url;
+    if (body) this._body = body;
+    return this._fetch<T>();
   }
 }

@@ -1,4 +1,5 @@
 export abstract class BaseRequest {
+  protected _url = '';
   protected _base = '';
   protected _header: Record<string, string> = {};
   protected _credentials: RequestCredentials = 'same-origin';
@@ -12,15 +13,20 @@ export abstract class BaseRequest {
     return this;
   }
 
-  set(key: string, value: string) {
+  url(url: string) {
+    this._url = url;
+    return this;
+  }
+
+  header(key: string, value: string) {
     this._header[key] = value;
     return this;
   }
 
-  setAll(header: Record<string, string> | [string, string][]) {
+  headers(header: Record<string, string> | [string, string][]) {
     if (Array.isArray(header)) {
       this._header = {}; // reset
-      header.forEach(([key, value]) => this.set(key, value));
+      header.forEach(([key, value]) => this.header(key, value));
     } else {
       this._header = header;
     }
