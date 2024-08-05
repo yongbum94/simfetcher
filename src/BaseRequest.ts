@@ -70,6 +70,10 @@ export abstract class BaseRequest {
     return this;
   }
 
+  auth(value: string, key: string = 'Authorization') {
+    return this.header(key, value);
+  }
+
   body(body: XMLHttpRequestBodyInit) {
     this._body = body;
     return this;
