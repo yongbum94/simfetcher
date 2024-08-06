@@ -1,4 +1,4 @@
-import { Request, type WrapperResponse } from './Request.js';
+import { Request, type WrapperResponse } from './Request';
 
 export type { Request, WrapperResponse };
 

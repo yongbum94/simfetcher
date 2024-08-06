@@ -1,11 +1,11 @@
-import { BaseRequest } from './BaseRequest.js';
+import { BaseRequest } from './BaseRequest';
 
 export interface WrapperResponse<T extends any> extends Response {
   jsonbody: T;
 }
 
 export class Request extends BaseRequest {
-  private _method = '';
+  _method = '';
 
   private async _fetch<T extends any>() {
     let url = this._base + this._url;

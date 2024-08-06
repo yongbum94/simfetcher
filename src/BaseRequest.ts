@@ -1,12 +1,12 @@
 export abstract class BaseRequest {
-  protected _url = '';
-  protected _base = '';
-  protected _header: Record<string, string> = {};
-  protected _credentials: RequestCredentials = 'same-origin';
-  protected _searchParams = new URLSearchParams();
-  protected _cache: RequestCache = 'default';
-  protected _keepalive: boolean = false;
-  protected _body?: XMLHttpRequestBodyInit;
+  _url = '';
+  _base = '';
+  _header: Record<string, string> = {};
+  _credentials: RequestCredentials = 'same-origin';
+  _searchParams = new URLSearchParams();
+  _cache: RequestCache = 'default';
+  _keepalive: boolean = false;
+  _body?: XMLHttpRequestBodyInit;
 
   base(url: string) {
     this._base = url;
