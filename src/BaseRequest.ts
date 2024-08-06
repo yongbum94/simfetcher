@@ -40,6 +40,7 @@ export abstract class BaseRequest {
 
   keepalive(active?: boolean) {
     this._keepalive = !(active === false);
+    return this;
   }
 
   cookie(key: string, value: string) {

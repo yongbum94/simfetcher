@@ -1,6 +1,7 @@
 import { Request, type WrapperResponse } from './Request';
 
-export type { Request, WrapperResponse };
+export { Request };
+export type { WrapperResponse };
 
 /**
  * 요청을 위한 베이스 생성
