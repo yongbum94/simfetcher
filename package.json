@@ -22,6 +22,7 @@
   ],
   "scripts": {
     "test": "jest",
+    "test:coverage": "jest --coverage",
     "style": "prettier ./src/*.ts --write",
     "clean": "rimraf dist",
     "complie": "tsc --module commonjs --outDir dist/cjs/ && tsc --module esnext --outDir dist/mjs/",
@@ -45,6 +46,7 @@
     "renamer": "^5.0.2",
     "rimraf": "^5.0.9",
     "ts-jest": "^29.2.4",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "msw": "^2.3.5"
   }
 }
