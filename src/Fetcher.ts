@@ -2,7 +2,7 @@
 // support  cross nodejs & browser platform ..
 import fetch from 'cross-fetch';
 
-import { clone, merge } from './utils';
+import { clone, merge, transferUrl } from './utils';
 import { FetcherState, FetcherStateProvider, FetcherStore } from './FetcherStore';
 import { FetcherEvents } from './FetcherEvents';
 
@@ -40,25 +40,14 @@ export class Fetcher {
   }
 
   private _createRequest<T>({ url, store, config, provider }: { url: string; store: FetcherStore<T>; provider: FetcherStateProvider<T>; config: FetcherConfig }) {
-    const _requestEvents: FetcherEvents = new FetcherEvents();
-
     const fetcher = this;
+    const _requestEvents: FetcherEvents = new FetcherEvents();
 
     const _onChangeEvents: FetchOnChangeEvent<T>[] = [];
     const _fireOnChangeEvents = (state: Partial<FetcherState<T>>) => {
       store.setState({ ...store.state, ...state });
       _onChangeEvents.forEach((listener) => listener(provider));
     };
-
-    const _transferUrl = (url: string, params: Record<string, any>) => {
-      const reg = /:[^\s/]+/;
-      const matcher = url.match(reg);
-      if (!matcher) return url;
-      const key = matcher[0].substring(1);
-      const _url = url.replace(matcher[0], params[key] || '');
-      return _transferUrl(_url, params);
-    };
-
     const onChange = (listener: FetchOnChangeEvent<T>) => {
       _onChangeEvents.push(listener);
     };
@@ -70,7 +59,7 @@ export class Fetcher {
       let res;
 
       try {
-        res = fetch(_config.baseUrl + _transferUrl(url, _config.params || {}), _config);
+        res = fetch(_config.baseUrl + transferUrl(url, _config.params || {}), _config);
       } catch (e) {
         return Promise.reject(e);
       }
