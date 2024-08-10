@@ -20,7 +20,7 @@ export class FetcherStore<T> {
   }
 
   public setState(state: FetcherState<T>) {
-    this._state = clone(state);
+    this._state = state;
   }
 }
 

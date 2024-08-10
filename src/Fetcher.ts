@@ -4,6 +4,7 @@ import fetch from 'cross-fetch';
 
 import { clone, merge } from './utils';
 import { FetcherState, FetcherStateProvider, FetcherStore } from './FetcherStore';
+import { FetcherEvents } from './FetcherEvents';
 
 export interface FetcherConfig extends RequestInit {
   baseUrl?: string;
@@ -12,29 +13,24 @@ export interface FetcherConfig extends RequestInit {
 
 export type FetchRequsetIntercept = (config: FetcherConfig) => FetcherConfig;
 export type FetchResponseIntercept = (response: Response) => Promise<any & Response>;
-export interface FetcherEvents {
-  request: FetchRequsetIntercept[];
-  response: FetchResponseIntercept[];
-}
+// export interface FetcherEvents {
+//   request: FetchRequsetIntercept[];
+//   response: FetchResponseIntercept[];
+// }
 export type FetchOnChangeEvent<T> = (provider: FetcherStateProvider<T>) => void;
 
 export class Fetcher {
-  private readonly events: FetcherEvents = {
-    request: [],
-    response: [],
-  };
+  constructor(
+    public readonly config: FetcherConfig = {},
+    public readonly events: FetcherEvents,
+  ) {}
 
-  constructor(public readonly config: FetcherConfig = {}) {}
-
-  on(event: 'request', listener: FetchRequsetIntercept): void;
-  on(event: 'response', listener: FetchResponseIntercept): void;
-  on(event: 'request' | 'response', listener: any) {
-    this.events[event].push(listener);
+  get on() {
+    return this.events.on.bind(this.events);
   }
 
-  off(event: 'request' | 'response', listener: any) {
-    const idx = this.events[event].indexOf(listener);
-    if (idx > -1) this.events[event].splice(idx, 1);
+  get off() {
+    return this.events.off.bind(this.events);
   }
 
   create<T>(url: string, defaultValue: T, config: FetcherConfig = {}) {
@@ -44,7 +40,10 @@ export class Fetcher {
   }
 
   private _createRequest<T>({ url, store, config, provider }: { url: string; store: FetcherStore<T>; provider: FetcherStateProvider<T>; config: FetcherConfig }) {
+    const _requestEvents: FetcherEvents = new FetcherEvents();
+
     const fetcher = this;
+
     const _onChangeEvents: FetchOnChangeEvent<T>[] = [];
     const _fireOnChangeEvents = (state: Partial<FetcherState<T>>) => {
       store.setState({ ...store.state, ...state });
@@ -66,7 +65,7 @@ export class Fetcher {
 
     const request = function request(requestConfig: FetcherConfig = {}) {
       const _requsetConfig = merge<FetcherConfig>(merge(clone(fetcher.config), clone(config)), clone(requestConfig));
-      const _config = fetcher.events.request.reduce((acc, listener) => listener(acc), _requsetConfig);
+      const _config = fetcher.events.request.concat(_requestEvents.request).reduce((acc, listener) => listener(acc), _requsetConfig);
 
       let res;
 
@@ -79,12 +78,7 @@ export class Fetcher {
       _fireOnChangeEvents({ status: 'pending', error: null });
 
       return new Promise<T>((resolve, reject) => {
-        const _res = fetcher.events.response.reduce((acc, listener) => {
-          return acc.then((__res) => {
-            return listener(__res);
-          });
-        }, res);
-
+        const _res = fetcher.events.response.concat(_requestEvents.response).reduce((acc, listener) => acc.then((__res) => listener(__res)), res);
         _res
           .then((__res) => {
             _fireOnChangeEvents({ status: 'success', value: __res as T, error: null });
@@ -97,6 +91,6 @@ export class Fetcher {
       });
     };
 
-    return { request, onChange, provider };
+    return { request, onChange, provider, events: _requestEvents };
   }
 }
