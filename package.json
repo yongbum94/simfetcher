@@ -1,5 +1,5 @@
 {
-  "name": "simfetch",
+  "name": "simfetcher",
   "version": "1.0.0",
   "description": "simplify use fetch api",
   "exports": {
