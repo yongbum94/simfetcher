@@ -66,7 +66,7 @@ export class Fetcher {
       _onChangeEvents.push(listener);
     };
 
-    const fetchConfig = fetcher.config;
+    const fetchConfig = { ...fetcher.config, ...config };
     const request = function request(requestConfig: FetchConfig = {}) {
       let res;
 
