@@ -1,4 +1,4 @@
-import { cloneDeep } from './utils/cloneDeep';
+import { clone } from './utils';
 
 export type FetcherStatus = 'pending' | 'success' | 'error';
 export type FetcherError = Error | any;
@@ -20,7 +20,7 @@ export class FetcherStore<T> {
   }
 
   public setState(state: FetcherState<T>) {
-    this._state = cloneDeep(state);
+    this._state = clone(state);
   }
 }
 

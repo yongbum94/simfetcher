@@ -1,7 +1,7 @@
 import { Fetcher } from './Fetcher';
 import type { FetcherConfig } from './Fetcher';
 
-export type { FetchConfig, FetchOnChangeEvent, FetchRequsetIntercept, FetchResponseIntercept, FetcherConfig, FetcherEvents } from './Fetcher';
+export type { Fetcher, FetcherConfig, FetchOnChangeEvent, FetchRequsetIntercept, FetchResponseIntercept, FetcherEvents } from './Fetcher';
 export type { FetcherError, FetcherState, FetcherStateProvider, FetcherStatus, FetcherStore } from './FetcherStore';
 
 /**
@@ -9,8 +9,8 @@ export type { FetcherError, FetcherState, FetcherStateProvider, FetcherStatus, F
  * @param config
  * @returns {Fetcher}
  */
-export function simfetch(config: FetcherConfig = {}) {
+export function simfetcher(config: FetcherConfig = {}) {
   return new Fetcher(config);
 }
 
-export default simfetch;
+export default simfetcher;
