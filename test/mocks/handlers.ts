@@ -14,4 +14,15 @@ export const handlers = [
     // ...and respond to them using this JSON response.
     return new HttpResponse(null, { status: 500 });
   }),
+
+  http.all('https://example.com/headers', ({ request }) => {
+    // @ts-ignore
+    const headers = request.headers.entries();
+    const body: Record<string, string> = {};
+
+    for (const [key, value] of headers) {
+      body[key] = value;
+    }
+    return HttpResponse.json(body);
+  }),
 ];
