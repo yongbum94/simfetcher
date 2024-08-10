@@ -13,10 +13,6 @@ export interface FetcherConfig extends RequestInit {
 
 export type FetchRequsetIntercept = (config: FetcherConfig) => FetcherConfig;
 export type FetchResponseIntercept = (response: Response) => Promise<any & Response>;
-// export interface FetcherEvents {
-//   request: FetchRequsetIntercept[];
-//   response: FetchResponseIntercept[];
-// }
 export type FetchOnChangeEvent<T> = (provider: FetcherStateProvider<T>) => void;
 
 export class Fetcher {
