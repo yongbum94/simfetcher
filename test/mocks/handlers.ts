@@ -25,4 +25,8 @@ export const handlers = [
     }
     return HttpResponse.json(body);
   }),
+
+  http.all('https://example.com/params/:parent/:id', ({ request, params }) => {
+    return HttpResponse.json(params);
+  }),
 ];
