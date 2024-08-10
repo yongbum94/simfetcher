@@ -33,7 +33,6 @@ fetcher.on('request', (config) => {
 // intercept response
 fetcher.on('response', (res) => {
   if (!res.ok) {
-    alert('fail request!');
     return Promise.reject(res);
   }
 
@@ -45,7 +44,7 @@ fetcher.on('response', (res) => {
     });
   }
 
-  return Promise.resolve(res);
+  return Promise.resolve({});
 });
 
 const { provider, request, onChange } = fetcher.create<{
@@ -71,15 +70,21 @@ onChange((provider) => {
   }
 });
 
-request({ params: { id: 1 } });
+request({ params: { id: 1 } })
+  .then((res) => {
+    // resolve
+  })
+  .catch((error) => {
+    // reject
+  });
 ```
 
 ```ts
 // none detect simple request
-const { request } = fetcher.create('/boards/:id', {}, { method: 'DELETE' });
+const { request } = fetcher.create('/boards/:id', {}, {});
 
 export function deleteBoard(id: string | number) {
-  return request({ params: { id } });
+  return request({ params: { id }, method: 'DELETE' });
 }
 
 deleteBoard(1).then((res) => {
