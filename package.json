@@ -1,6 +1,6 @@
 {
   "name": "simfetcher",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "simplify use fetch api",
   "exports": {
     ".": {
@@ -27,7 +27,8 @@
     "clean": "rimraf dist",
     "complie": "tsc --module commonjs --outDir dist/cjs/ && tsc --module esnext --outDir dist/mjs/",
     "rename": "renamer  --path-element ext dist/cjs/**/* -f .js -r .cjs && renamer  --path-element ext dist/cjs/**/* -f .ts -r .cts",
-    "build": "npm run clean && npm run complie && npm run rename"
+    "build": "npm run clean && npm run complie && npm run rename",
+    "prepack": "npm run test && npm run build"
   },
   "keywords": [
     "fetch",
