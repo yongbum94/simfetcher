@@ -7,7 +7,7 @@
     "esModuleInterop": true,
     "strict": true,
     "declaration": true,
-    "skipLibCheck": true
+    "moduleResolution": "Node"
   },
   "include": ["src", "test"],
   "exclude": ["test", "**.test.ts"]
