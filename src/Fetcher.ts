@@ -53,7 +53,8 @@ export class Fetcher<T extends FetcherConfig> {
 
     const request = function request(requestConfig: T1) {
       const _requsetConfig = merge<T1>(merge(clone(fetcher.config), clone(config)), clone(requestConfig));
-      const _config = _requestEvents.request.concat(fetcher.events.request as any).reduce((acc, listener) => listener(acc), _requsetConfig);
+      const onReqeust = [...fetcher.events.request, ..._requestEvents.request];
+      const _config = onReqeust.reduce((acc, listener) => listener(acc) as T1, _requsetConfig);
 
       let res;
 
@@ -66,7 +67,8 @@ export class Fetcher<T extends FetcherConfig> {
       _fireOnChangeEvents({ status: 'pending', error: null });
 
       return new Promise<R>((resolve, reject) => {
-        const _res = _requestEvents.response.concat(fetcher.events.response as any).reduce((acc, listener) => acc.then((__res) => listener(__res)), res as Promise<R>);
+        const onResponse = [...fetcher.events.response, ..._requestEvents.response];
+        const _res = onResponse.reduce((acc, listener) => acc.then((__res) => listener(__res)), res) as Promise<R>;
         _res
           .then((__res) => {
             _fireOnChangeEvents({ status: 'success', value: __res, error: null });
