@@ -49,8 +49,5 @@
     "rimraf": "^5.0.9",
     "ts-jest": "^29.2.4",
     "typescript": "^5.5.4"
-  },
-  "dependencies": {
-    "cross-fetch": "^4.0.0"
   }
 }

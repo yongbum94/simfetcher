@@ -1,7 +1,3 @@
-// fetch ponyfill
-// support  cross nodejs & browser platform ..
-import fetch from 'cross-fetch';
-
 import { clone, merge, transferUrl } from './utils';
 import { FetcherState, FetcherStateProvider, FetcherStore } from './FetcherStore';
 import { FetcherEvents } from './FetcherEvents';

@@ -1,11 +1,7 @@
 import './setup';
-import 'cross-fetch';
 
 import { Fetcher, FetcherConfig, FetcherStateProvider, simfetcher } from '../src';
 import { FetcherEvents } from '../src/FetcherEvents';
-/**
- * @jest-environment jsdom
- */
 
 interface User {
   id: string;
