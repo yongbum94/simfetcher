@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "lib": ["es2015", "DOM"],
+    "types": [],
+    "module": "ESNext",
+    "target": "ES2015",
+    "esModuleInterop": true,
+    "strict": true,
+    "declaration": true
+  },
+  "include": ["."]
+}
