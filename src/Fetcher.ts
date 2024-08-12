@@ -7,14 +7,12 @@ export interface FetcherConfig extends RequestInit {
   params?: Record<string, any>;
 }
 
-export type FetchRequsetIntercept = (config: FetcherConfig) => FetcherConfig;
-export type FetchResponseIntercept = (response: Response) => Promise<any & Response>;
 export type FetchOnChangeEvent<T> = (provider: FetcherStateProvider<T>) => void;
 
-export class Fetcher {
+export class Fetcher<T extends FetcherConfig> {
   constructor(
-    public readonly config: FetcherConfig = {},
-    public readonly events: FetcherEvents,
+    public readonly config: T,
+    public readonly events: FetcherEvents<T>,
   ) {}
 
   get on() {
@@ -25,28 +23,37 @@ export class Fetcher {
     return this.events.off.bind(this.events);
   }
 
-  create<T>(url: string, defaultValue: T, config: FetcherConfig = {}) {
-    const store = new FetcherStore<T>(defaultValue);
-    const provider = new FetcherStateProvider<T>(store);
-    return this._createRequest<T>({ url, store, provider, config });
+  create<R = any, T1 extends T = T>(url: string, defaultValue: R, config: FetcherConfig = {}) {
+    const store = new FetcherStore<R>(defaultValue);
+    const provider = new FetcherStateProvider<R>(store);
+    return this._createRequest<R, T1>({ url, store, provider, config });
   }
 
-  private _createRequest<T>({ url, store, config, provider }: { url: string; store: FetcherStore<T>; provider: FetcherStateProvider<T>; config: FetcherConfig }) {
+  private _createRequest<R = any, T1 extends T = T>({
+    url,
+    store,
+    config,
+    provider,
+  }: {
+    url: string;
+    store: FetcherStore<R>;
+    provider: FetcherStateProvider<R>;
+    config: FetcherConfig;
+  }) {
     const fetcher = this;
-    const _requestEvents: FetcherEvents = new FetcherEvents();
-
-    const _onChangeEvents: FetchOnChangeEvent<T>[] = [];
-    const _fireOnChangeEvents = (state: Partial<FetcherState<T>>) => {
+    const _requestEvents: FetcherEvents<T1> = new FetcherEvents();
+    const _onChangeEvents: FetchOnChangeEvent<R>[] = [];
+    const _fireOnChangeEvents = (state: Partial<FetcherState<R>>) => {
       store.setState({ ...store.state, ...state });
       _onChangeEvents.forEach((listener) => listener(provider));
     };
-    const onChange = (listener: FetchOnChangeEvent<T>) => {
+    const onChange = (listener: FetchOnChangeEvent<R>) => {
       _onChangeEvents.push(listener);
     };
 
-    const request = function request(requestConfig: FetcherConfig = {}) {
-      const _requsetConfig = merge<FetcherConfig>(merge(clone(fetcher.config), clone(config)), clone(requestConfig));
-      const _config = fetcher.events.request.concat(_requestEvents.request).reduce((acc, listener) => listener(acc), _requsetConfig);
+    const request = function request(requestConfig: T1) {
+      const _requsetConfig = merge<T1>(merge(clone(fetcher.config), clone(config)), clone(requestConfig));
+      const _config = _requestEvents.request.concat(fetcher.events.request as any).reduce((acc, listener) => listener(acc), _requsetConfig);
 
       let res;
 
@@ -58,12 +65,12 @@ export class Fetcher {
 
       _fireOnChangeEvents({ status: 'pending', error: null });
 
-      return new Promise<T>((resolve, reject) => {
-        const _res = fetcher.events.response.concat(_requestEvents.response).reduce((acc, listener) => acc.then((__res) => listener(__res)), res);
+      return new Promise<R>((resolve, reject) => {
+        const _res = _requestEvents.response.concat(fetcher.events.response as any).reduce((acc, listener) => acc.then((__res) => listener(__res)), res as Promise<R>);
         _res
           .then((__res) => {
-            _fireOnChangeEvents({ status: 'success', value: __res as T, error: null });
-            resolve(__res as T);
+            _fireOnChangeEvents({ status: 'success', value: __res, error: null });
+            resolve(__res);
           })
           .catch((e) => {
             _fireOnChangeEvents({ status: 'error', error: e });

@@ -1,14 +1,12 @@
 import { FetcherConfig } from './Fetcher';
 
-export type FetchRequsetIntercept = (config: FetcherConfig) => FetcherConfig;
-export type FetchResponseIntercept = (response: Response) => Promise<any & Response>;
-export class FetcherEvents {
-  public readonly request: FetchRequsetIntercept[] = [];
+export type FetchRequsetIntercept<T extends FetcherConfig> = (config: T) => T;
+export type FetchResponseIntercept = (response: any) => Promise<any>;
+export class FetcherEvents<T extends FetcherConfig> {
+  public readonly request: FetchRequsetIntercept<T>[] = [];
   public readonly response: FetchResponseIntercept[] = [];
 
-  constructor() {}
-
-  on(event: 'request', listener: FetchRequsetIntercept): void;
+  on(event: 'request', listener: FetchRequsetIntercept<T>): void;
   on(event: 'response', listener: FetchResponseIntercept): void;
   on(event: 'request' | 'response', listener: any) {
     this[event].push(listener);
