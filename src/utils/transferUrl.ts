@@ -1,8 +1,17 @@
+const URL_REGEX = /:[^\s/]+/;
+
 export function transferUrl(url: string, params: Record<string, any>) {
-  const reg = /:[^\s/]+/;
-  const matcher = url.match(reg);
+  const matcher = url.match(URL_REGEX);
   if (!matcher) return url;
-  const key = matcher[0].substring(1);
-  const _url = url.replace(matcher[0], params[key] || '');
-  return transferUrl(_url, params);
+
+  let pattern = matcher[0];
+  const key = pattern.substring(1);
+  let value = params[key];
+
+  if (value === '' || typeof value === 'undefined') {
+    pattern = '/' + pattern;
+    value = '';
+  }
+
+  return transferUrl(url.replace(pattern, value), params);
 }
