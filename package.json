@@ -1,6 +1,6 @@
 {
   "name": "simfetcher",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "simplify use fetch api",
   "exports": {
     ".": {
@@ -32,7 +32,8 @@
   },
   "keywords": [
     "fetch",
-    "javascript"
+    "http",
+    "request"
   ],
   "author": "yongbum (https://github.com/yongbum94)",
   "license": "MIT",
