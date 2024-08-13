@@ -2,7 +2,7 @@ import simfetcher, { FetcherConfig } from '../dist/mjs/index.js';
 
 export class ApiError extends Error {
   constructor(response: Response) {
-    super(response.statusText);
+    super(`API ERROR [${response.status}] ${response.statusText}`);
     this.name = 'ApiError';
   }
 }
@@ -45,7 +45,9 @@ fetcher.on('response', (response: Response) => {
       if (response.status === 403) {
         alert('forbidden');
       }
-    } else throw new ApiError(response);
+    } else {
+      Promise.reject(new ApiError(response));
+    }
   }
 
   return new Promise<AppResponse>((resolve) => {
