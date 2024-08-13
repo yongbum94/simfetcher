@@ -51,7 +51,7 @@ export class Fetcher<T extends FetcherConfig> {
       _onChangeEvents.push(listener);
     };
 
-    const request = function request(requestConfig: T1) {
+    const request = function request(requestConfig: T1 = {} as T1) {
       const _requsetConfig = merge<T1>(merge(clone(fetcher.config), clone(config)), clone(requestConfig));
       const onReqeust = [...fetcher.events.request, ..._requestEvents.request];
       const _config = onReqeust.reduce((acc, listener) => listener(acc) as T1, _requsetConfig);
