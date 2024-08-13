@@ -1,26 +1,31 @@
 # simfetcher
 
-`fetch`를 베이스로 사용합니다.
+# Table of Content
 
-서버별로 제공되는 REST API 서비스를 공통적인 처리를 위해 구성하는 과정은 괴롭습니다.
+- [Overview](#overview)
+- [Fetures](#fetures)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Examples](#examples)
+- [License](#license)
 
-해당 과정을 좀 더 쉽게 할 수 있도록 아래의 기능을 제공합니다.
+# Overview
 
-1. `fetch` 기본 옵션을 제공합니다.
-2. `fetch` 요청 및 응답에 대한 `intercept` 이벤트를 제공합니다.
-3. URI 별 요청 상태와 상태 설정값, 변경 이벤트를 세팅할 수 있습니다.
+simple library for managing REST API
 
-기존의 `fetch` 옵션을 대부분 그대로 사용합니다.
+# Fetures
 
-폴리필을 포함하며 `nodejs` & `browser` 환경을 지원합니다.
+- use native api `fetch`
+- `intercept` events for `request` and `response`
+- management for State based on URI.
 
-## Installation
+# Installation
 
 ```bash
 npm i simfetcher
 ```
 
-## Usage
+# Quick Start
 
 ```ts
 import simfetcher from 'simfetcher';
@@ -32,76 +37,248 @@ const fetcher = simfetcher({
 
 // intercept request
 fetcher.on('request', (config) => {
-  config.headers['Authorization'] = localStorage.getItem('accessToken');
+  config.headers = {
+    ...config.headers,
+    Authorization: localStorage.getItem('accessToken') || '',
+  };
   return config;
 });
 
 // intercept response
 fetcher.on('response', (res) => {
+  const response = res;
   if (!res.ok) {
     return Promise.reject(res);
   }
 
-  if (res.headers['content-type'] === 'application/json') {
-    return new Promise((resolve) => {
-      res.json().then((body) => {
-        resolve(body);
+  return new Promise<AppResponse>((resolve) => {
+    if (response.headers.get('content-type') === 'application/json') {
+      response.json().then((jsonBody) => {
+        resolve({ response, jsonBody });
       });
-    });
-  }
-
-  return Promise.resolve({});
+    } else {
+      resolve({ response, jsonBody: {} });
+    }
+  });
 });
 
-const { provider, request, onChange } = fetcher.create<{
+interface Board {
   id: string;
   title: string;
   content: string;
-}>(
+}
+
+interface MyFetchResponse {
+  response?: Response;
+  jsonBody: Board;
+}
+
+const { provider, request, onChange, events } = fetcher.create<MyFetchResponse>(
   '/boards/:id',
-  { id: '', title: '', content: '' },
+  { jsonBody: { id: '', title: '', content: '' } },
   {
     method: 'GET',
   },
 );
 
+// use Intercept by URI (request)
+events.on('response', ({ response, body }) => {
+  return { response, body };
+});
+
+// 1. management fetch state
 onChange((provider) => {
-  // provider.status 가 변경될때마다 호출
+  // onChangeServiceStatus {provider.status}
   if (provider.status === 'pending') {
-    // 대기 상태에 대한 처리
+    // pending..
   } else if (provider.status === 'success') {
-    // 요청 성공시에 대한 처리
+    // success
   } else if (provider.status === 'error') {
-    // 요청이 실패된 경우에 대한 처리
+    // error
   }
 });
 
+// 2. or use support promise..
 request({ params: { id: 1 } })
-  .then((res) => {
+  .then(({ response, body }) => {
     // resolve
+    // no effect provider
   })
   .catch((error) => {
     // reject
+    // no effect provider
   });
 ```
 
-```ts
-// none detect simple request
-const { request } = fetcher.create('/boards/:id', {}, {});
+# API
 
-export function deleteBoard(id: string | number) {
-  return request({ params: { id }, method: 'DELETE' });
+## Make Fetcher
+
+**default config type**
+
+```ts
+interface FetcherConfig extends RequestInit {
+  baseUrl?: string;
+  params?: Record<string, any>;
 }
 
-deleteBoard(1).then((res) => {
-  //done!
+const fetcher = simfetcher(
+  /* default FetcherConfig */
+  {
+    baseUrl: '/v1/api',
+    headers: {
+      'content-type': 'application/json',
+    },
+  },
+);
+```
+
+**use custom config type**
+
+```ts
+export interface AppFetcherConfig extends FetcherConfig {
+  slient: boolean;
+}
+
+const fetcher = simfetcher<AppFetcherConfig>({
+  baseUrl: '/v1/api',
+  headers: {
+    'content-type': 'application/json',
+  },
+  slient: false,
 });
 ```
 
-## License
+### interceptor Request/Response
 
-[MIT](LICENSE) @yongbum94
+Events are fired sequentially.
 
-## Reference
+```ts
+fetcher.on('request', (config) => {
+  config.headers = {
+    ...config.headers,
+    Authorization: localStorage.getItem('accessToken') || '',
+  };
+  return config; // config for fetch api
+});
+```
 
-[cross-fetch](https://github.com/lquixada/cross-fetch)
+```ts
+class ApiError extends Error {
+  constructor(response: Response) {
+    super(`API ERROR [${response.status}] ${response.statusText}`);
+    this.name = 'ApiError';
+  }
+}
+
+interface AppResponse<T = any> {
+  response?: Response;
+  jsonBody: T;
+}
+
+fetcher.on('response', (response: Response) => {
+  if (!response.ok) {
+    if (response.status >= 500) {
+      alert('server error');
+    } else if (response.status >= 400) {
+      if (response.status === 400) {
+        alert('Bad Requset');
+      }
+      if (response.status === 401) {
+        alert('Unauthorized');
+      }
+      if (response.status === 403) {
+        alert('forbidden');
+      }
+    } else {
+      Promise.reject(new ApiError(response));
+    }
+  }
+
+  return new Promise<AppResponse>((resolve) => {
+    if (response.headers.get('content-type') === 'application/json') {
+      response.json().then((jsonBody) => {
+        resolve({ response, jsonBody });
+      });
+    } else {
+      resolve({ response, jsonBody: {} });
+    }
+  });
+});
+
+fetcher.on('response', ({ jsonBody, response }: AppResponse) => {
+  console.log('SUCCESS : ', jsonBody, response);
+  return Promise.resolve({ jsonBody, response });
+});
+```
+
+## Make FetchService by URI
+
+### Fetcher.create
+
+```ts
+function create<RepsonseType, RequestConfig>(URI: string, defaultValue: RepsonseType, config: RequestConfig): FetcherSerivce;
+```
+
+### FetcherService
+
+#### FetcherService.provider
+
+**provider.status** : `pending` | `success` | `error` (default: `pending`)
+
+**provider.error** : when status was error. it return `error` (default: `null`)
+
+**provider.value = ResponseType** : response interceptor return value (default: `RepsonseType`)
+
+**provider.force(state:RepsonseType)** : force update `provider.value`
+
+**Warning**
+
+```ts
+const { status, error, value } = provider; // do not this.. can not observing
+```
+
+#### FetcherService.onChange
+
+`provider.status` change event
+
+ignore `provider.force`
+
+```ts
+onChange((provider) => {
+  console.log(provider.staus);
+});
+```
+
+#### FetcherService.events
+
+interceptor Request/Response Events
+
+it work after fetcher Interceptor
+
+```ts
+events.on('request', (config) => {
+  return config;
+});
+events.on('response', (res) => {
+  return Promise.resovle(res);
+});
+```
+
+#### FetcherService.request
+
+wort on `fetch`
+
+```ts
+request({ id: '1' }).then((response) => {
+  // it work after all response Interceptor
+});
+```
+
+# Examples
+
+[Example Code](https://github.com/yongbum94/simfetcher/tree/main/examples)
+
+# License
+
+[MIT](LICENSE)
