@@ -12,7 +12,11 @@ export interface AppResponse<T = any> {
   jsonBody: T;
 }
 
-const fetcher = simfetcher<FetcherConfig>({
+export interface AppFetcherConfig extends FetcherConfig {
+  slient?: boolean;
+}
+
+const fetcher = simfetcher<AppFetcherConfig>({
   baseUrl: '/v1/api',
   headers: {
     'content-type': 'application/json',
