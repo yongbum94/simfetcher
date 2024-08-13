@@ -9,15 +9,15 @@ interface User {
   lastName: string;
 }
 describe('simfetcher', () => {
-  let fetcher: Fetcher, provider: any, request: any, onChange: any, events: FetcherEvents;
+  let fetcher: Fetcher<FetcherConfig>, provider: any, request: any, onChange: any, events: FetcherEvents<FetcherConfig>;
 
   beforeAll(() => {
-    fetcher = simfetcher({
+    fetcher = simfetcher<FetcherConfig>({
       baseUrl: 'https://example.com',
       headers: { 'content-type': 'application/json' },
     });
 
-    fetcher.on('response', (res) => {
+    fetcher.on('response', (res: Response) => {
       if (!res.ok) {
         return Promise.reject(res);
       }
