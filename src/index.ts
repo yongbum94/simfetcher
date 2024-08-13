@@ -10,8 +10,8 @@ export type { FetcherEvents, FetchRequsetIntercept, FetchResponseIntercept } fro
  * @param config
  * @returns {Fetcher}
  */
-export function simfetcher<T extends FetcherConfig = FetcherConfig>(config: T) {
-  return new Fetcher<T>(config, new FetcherEvents<T>());
+export function simfetcher<T extends FetcherConfig = FetcherConfig>(config: T & FetcherConfig) {
+  return new Fetcher<T & FetcherConfig>(config, new FetcherEvents<T & FetcherConfig>());
 }
 
 export default simfetcher;
