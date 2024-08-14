@@ -28,14 +28,31 @@ npm i simfetcher
 # Quick Start
 
 ```ts
-import simfetcher from 'simfetcher';
-// create fetcher
-const fetcher = simfetcher({
+import simfetcher, { FetcherConfig } from '../dist/mjs/index.js';
+
+class ApiError extends Error {
+  constructor(response: Response) {
+    super(`API ERROR [${response.status}] ${response.statusText}`);
+    this.name = 'ApiError';
+  }
+}
+
+interface AppResponse<T = any> {
+  response?: Response;
+  jsonBody: T;
+}
+
+interface AppFetcherConfig extends FetcherConfig {
+  // custom config
+}
+
+const fetcher = simfetcher<AppFetcherConfig>({
   baseUrl: '/v1/api',
-  headers: { 'content-type': 'application/json' },
+  headers: {
+    'content-type': 'application/json',
+  },
 });
 
-// intercept request
 fetcher.on('request', (config) => {
   config.headers = {
     ...config.headers,
@@ -44,11 +61,25 @@ fetcher.on('request', (config) => {
   return config;
 });
 
-// intercept response
-fetcher.on('response', (res) => {
-  const response = res;
-  if (!res.ok) {
-    return Promise.reject(res);
+fetcher.on('response', (response: Response) => {
+  if (!response.ok) {
+    let message = '';
+    if (response.status >= 500) {
+      message = 'Server Error';
+    } else if (response.status >= 400) {
+      if (response.status === 400) {
+        message ='Bad Requset';
+      }
+      if (response.status === 401) {
+        message = 'Unauthorized';
+      }
+      if (response.status === 403) {
+        message = 'Forbidden';
+      }
+      alert(message)
+    } else {
+      Promise.reject(new ApiError(response));
+    }
   }
 
   return new Promise<AppResponse>((resolve) => {
@@ -61,19 +92,13 @@ fetcher.on('response', (res) => {
     }
   });
 });
-
 interface Board {
   id: string;
-  title: string;
   content: string;
+  regDate: string;
 }
 
-interface MyFetchResponse {
-  response?: Response;
-  jsonBody: Board;
-}
-
-const { provider, request, onChange, events } = fetcher.create<MyFetchResponse>(
+const { provider, request, onChange, events } = fetcher.create<AppResponse<Board>>(
   '/boards/:id',
   { jsonBody: { id: '', title: '', content: '' } },
   {
@@ -82,8 +107,8 @@ const { provider, request, onChange, events } = fetcher.create<MyFetchResponse>(
 );
 
 // use Intercept by URI (request)
-events.on('response', ({ response, body }) => {
-  return { response, body };
+events.on('response', (response:AppResponse<Board>) => {
+  return Promise.resolve(response);
 });
 
 // 1. management fetch state
@@ -100,7 +125,8 @@ onChange((provider) => {
 
 // 2. or use support promise..
 request({ params: { id: 1 } })
-  .then(({ response, body }) => {
+  .then(({ response, jsonbody }) => {
+    console.log(jsonbody)
     // resolve
     // no effect provider
   })
